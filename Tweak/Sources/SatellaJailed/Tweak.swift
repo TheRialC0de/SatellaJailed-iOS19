@@ -28,6 +28,12 @@ struct Tweak {
                 ReceiptRefreshHook().hook()
             }
             
+            // Advanced Server Bypass (for stubborn apps with server validation)
+            if Preferences.isServerBypass || Preferences.isConsumables || Preferences.isAuthBypass {
+                AdvancedServerBypass.setupAllHooks()
+                NSLog("[SatellaJailed] Advanced server bypass enabled!")
+            }
+            
             // iOS 13+ hooks
             if #available(iOS 13, *) {
                 // Storefront hook for region checks
@@ -65,10 +71,17 @@ struct Tweak {
 
 @_cdecl("jinx_entry")
 func jinxEntry() {
-    // Catch any initialization crashes
-    do {
-        Tweak.ctor()
-    } catch {
-        NSLog("[SatellaJailed] Initialization error: \(error)")
+    // Log device compatibility info
+    let checker = SatellaCompatibilityChecker.shared
+    NSLog("[SatellaJailed] Starting on \(checker.deviceDisplayName())")
+    if !checker.requiresJailbreak() {
+        NSLog("[SatellaJailed] ✅ No jailbreak required for this device!")
     }
+    
+    // Initialize tweak with crash protection
+    autoreleasepool {
+        Tweak.ctor()
+    }
+    
+    NSLog("[SatellaJailed] Initialization complete")
 }

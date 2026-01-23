@@ -10,6 +10,12 @@ struct PreferencesView: View {
     @AppStorage("tella_isReceipt") private var isReceipt: Bool = false
     @AppStorage("tella_isStealth") private var isStealth: Bool = false
     
+    // Advanced Server Bypass Options
+    @AppStorage("tella_isServerBypass") private var isServerBypass: Bool = false
+    @AppStorage("tella_isDefaultsBypass") private var isDefaultsBypass: Bool = false
+    @AppStorage("tella_isConsumables") private var isConsumables: Bool = false
+    @AppStorage("tella_isAuthBypass") private var isAuthBypass: Bool = false
+    
     @Binding var isShowing: Bool
     @State private var isShowingOptions: Bool = false
     @Environment(\.dismiss) private var dismiss
@@ -52,6 +58,24 @@ struct PreferencesView: View {
                         SettingsToggle(title: "Zero Price", subtitle: "Show 0.00 for prices", isOn: $isPriceZero)
                         SettingsToggle(title: "Receipt", subtitle: "Generate fake receipts", isOn: $isReceipt)
                         SettingsToggle(title: "Stealth", subtitle: "Hide from detection", isOn: $isStealth)
+                        
+                        Divider().padding(.vertical, 4)
+                        
+                        Text("🔥 Server Bypass (Nuclear)")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal)
+                        
+                        Text("For apps with server-side validation")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal)
+                        
+                        SettingsToggle(title: "Server Bypass", subtitle: "Intercept API responses (RevenueCat, etc.)", isOn: $isServerBypass)
+                        SettingsToggle(title: "Storage Bypass", subtitle: "Hook UserDefaults premium checks", isOn: $isDefaultsBypass)
+                        SettingsToggle(title: "Infinite Consumables", subtitle: "999M coins/gems/credits", isOn: $isConsumables)
+                        SettingsToggle(title: "Auth Bypass", subtitle: "Fake authentication tokens", isOn: $isAuthBypass)
                     }
                     .padding()
                     .background(

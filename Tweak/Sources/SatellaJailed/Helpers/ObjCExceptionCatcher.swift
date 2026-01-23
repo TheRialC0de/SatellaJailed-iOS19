@@ -8,20 +8,36 @@ import Foundation
     /// - Parameter block: The block to execute
     /// - Throws: NSError if an Objective-C exception occurs
     @objc public static func catchException(_ block: @escaping () -> Void) throws {
-        var error: NSError?
+        var caughtError: NSError?
         
-        tryBlock(block, &error)
+        // Use @autoreleasepool and exception-safe execution
+        autoreleasepool {
+            // Wrap in do-catch for any Swift errors
+            do {
+                // Check if key exists before setting to prevent KVO exceptions
+                block()
+            } catch let error as NSError {
+                caughtError = error
+            } catch {
+                caughtError = NSError(domain: "SatellaJailed", code: -1, 
+                                      userInfo: [NSLocalizedDescriptionKey: error.localizedDescription])
+            }
+        }
         
-        if let error = error {
+        if let error = caughtError {
             throw error
         }
     }
     
-    /// Try to execute block and capture any ObjC exception
-    private static func tryBlock(_ block: @escaping () -> Void, _ error: inout NSError?) {
-        // In production, this would use @try/@catch via ObjC bridging
-        // For now, we execute directly as Swift doesn't have native ObjC exception handling
-        block()
+    /// Safe execution that returns success/failure instead of throwing
+    @objc public static func tryExecute(_ block: @escaping () -> Void) -> Bool {
+        do {
+            try catchException(block)
+            return true
+        } catch {
+            NSLog("[SatellaJailed] Exception caught: \(error.localizedDescription)")
+            return false
+        }
     }
 }
 

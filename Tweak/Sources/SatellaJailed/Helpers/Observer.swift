@@ -9,10 +9,10 @@ final class SatellaObserver: NSObject, SKPaymentTransactionObserver {
         _ queue: SKPaymentQueue,
         updatedTransactions transactions: [SKPaymentTransaction]
     ) {
-        lock.lock()
-        defer { lock.unlock() }
-        
         var current: [SKPaymentTransaction] = []
+        var observersCopy: [SKPaymentTransactionObserver] = []
+        
+        lock.lock()
         
         // Prevent multiple purchases from occupying the same memory (fix some crash)
         // Use thread-safe check with identity comparison
@@ -28,34 +28,46 @@ final class SatellaObserver: NSObject, SKPaymentTransactionObserver {
             purchases.removeFirst(purchases.count - 100)
         }
         
-        guard !current.isEmpty else { return }
+        // Copy observers while holding lock
+        observersCopy = observers
         
-        // Safely notify observers
-        let observersCopy = observers
         lock.unlock()
         
+        guard !current.isEmpty else { return }
+        
+        // Safely notify observers (outside lock to prevent deadlock)
         for observer in observersCopy {
             autoreleasepool {
                 observer.paymentQueue(queue, updatedTransactions: current)
             }
         }
-        
-        lock.lock()
     }
     
     // iOS 19 compatibility - implement required protocol methods
     func paymentQueueRestoreCompletedTransactionsFinished(_ queue: SKPaymentQueue) {
-        observers.forEach { observer in
-            if observer.responds(to: #selector(SKPaymentTransactionObserver.paymentQueueRestoreCompletedTransactionsFinished(_:))) {
-                observer.paymentQueueRestoreCompletedTransactionsFinished?(queue)
+        lock.lock()
+        let observersCopy = observers
+        lock.unlock()
+        
+        observersCopy.forEach { observer in
+            autoreleasepool {
+                if observer.responds(to: #selector(SKPaymentTransactionObserver.paymentQueueRestoreCompletedTransactionsFinished(_:))) {
+                    observer.paymentQueueRestoreCompletedTransactionsFinished?(queue)
+                }
             }
         }
     }
     
     func paymentQueue(_ queue: SKPaymentQueue, restoreCompletedTransactionsFailedWithError error: Error) {
-        observers.forEach { observer in
-            if observer.responds(to: #selector(SKPaymentTransactionObserver.paymentQueue(_:restoreCompletedTransactionsFailedWithError:))) {
-                observer.paymentQueue?(queue, restoreCompletedTransactionsFailedWithError: error)
+        lock.lock()
+        let observersCopy = observers
+        lock.unlock()
+        
+        observersCopy.forEach { observer in
+            autoreleasepool {
+                if observer.responds(to: #selector(SKPaymentTransactionObserver.paymentQueue(_:restoreCompletedTransactionsFailedWithError:))) {
+                    observer.paymentQueue?(queue, restoreCompletedTransactionsFailedWithError: error)
+                }
             }
         }
     }

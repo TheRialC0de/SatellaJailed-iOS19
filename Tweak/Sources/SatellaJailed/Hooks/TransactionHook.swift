@@ -30,18 +30,19 @@ struct TransactionHook: HookGroup {
     
     // Generate consistent transaction identifiers
     let replace1: T1 = { obj, _ in
-        // Use product identifier as seed for consistent ID
+        // Use product identifier as seed for consistent matching ID
         if let transaction = obj as? SKPaymentTransaction {
-            return "satella_\(transaction.payment.productIdentifier.hashValue)_\(Int(Date().timeIntervalSince1970))"
+            return "satella_match_\(transaction.payment.productIdentifier.hashValue)_\(Int(Date().timeIntervalSince1970))"
         }
-        return UUID().uuidString
+        return "satella_match_\(UUID().uuidString)"
     }
     
     let replace2: T2 = { obj, _ in
+        // Transaction identifier should be unique per transaction
         if let transaction = obj as? SKPaymentTransaction {
-            return "satella_\(transaction.payment.productIdentifier.hashValue)_\(Int(Date().timeIntervalSince1970))"
+            return "satella_txn_\(transaction.payment.productIdentifier.hashValue)_\(Int(Date().timeIntervalSince1970))_\(arc4random())"
         }
-        return UUID().uuidString
+        return "satella_txn_\(UUID().uuidString)"
     }
     
     // Return nil error for successful transaction

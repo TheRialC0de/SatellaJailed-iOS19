@@ -56,7 +56,7 @@ struct ReceiptGenerator {
             purchaseDateMs: now.description,
             purchaseDatePst: nowDate,
             originalPurchaseDate: nowDate,
-            originalPurchaseDateMs: nowDate,
+            originalPurchaseDateMs: now.description,
             originalPurchaseDatePst: nowDate,
             expiresDate: expDate,
             expiresDateMs: expNow.description,

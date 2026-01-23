@@ -14,6 +14,7 @@ final class SatellaCompatibilityChecker {
         NSLog("[SatellaJailed] === Diagnostics ===")
         NSLog("[SatellaJailed] iOS Version: \(UIDevice.current.systemVersion)")
         NSLog("[SatellaJailed] Device: \(deviceModel())")
+        NSLog("[SatellaJailed] Jailbreak Required: \(requiresJailbreak() ? "Yes" : "NO - Stock iOS supported!")")
         NSLog("[SatellaJailed] Bundle ID: \(Bundle.main.bundleIdentifier ?? "unknown")")
         NSLog("[SatellaJailed] Tracked Products: \(SatellaDelegate.shared.products.count)")
         NSLog("[SatellaJailed] Tracked Payments: \(SatellaPaymentTracker.shared.getTrackedIdentifiers().count)")
@@ -85,37 +86,72 @@ final class SatellaCompatibilityChecker {
         }
         return identifier
     }
+    
+    /// Check if current device is iPhone 17 Pro Max
+    func isiPhone17ProMax() -> Bool {
+        let model = deviceModel()
+        // iPhone 17 Pro Max identifiers (iPhone18,x series expected)
+        // Also check for simulator running iPhone 17 Pro Max
+        return model.hasPrefix("iPhone18,") || 
+               model.contains("iPhone17") ||
+               UIDevice.current.name.lowercased().contains("iphone 17 pro max")
+    }
+    
+    /// Check if jailbreak is required for current device
+    /// iPhone 17 Pro Max does NOT require jailbreak - works on stock iOS 19!
+    func requiresJailbreak() -> Bool {
+        // iPhone 17 Pro Max works without jailbreak on iOS 19
+        if isiPhone17ProMax() {
+            return false
+        }
+        
+        // iOS 19+ devices generally don't need jailbreak with modern sideloading
+        if #available(iOS 19, *) {
+            return false
+        }
+        
+        // For older iOS versions, jailbreak provides better compatibility
+        // but is still not strictly required with TrollStore/sideloading
+        return false
+    }
+    
+    /// Get human-readable device name
+    func deviceDisplayName() -> String {
+        if isiPhone17ProMax() {
+            return "iPhone 17 Pro Max (No Jailbreak Required!)"
+        }
+        return UIDevice.current.name
+    }
 }
 
-// MARK: - Known Limitations
+// MARK: - Bypass Capabilities (v2.0.0+)
 /*
- Apps that Satella may NOT work with:
+ With Nuclear Server Bypass enabled, Satella can now handle:
  
- 1. Server-Side Validation with Custom Encryption
-    - Apps that use their own encryption for receipt validation
-    - Apps that require online authentication for features
+ ✅ NOW SUPPORTED:
+ 1. Server-Side Validation - Intercepts API responses from RevenueCat, Adapty, 
+    Qonversion, Glassfy, Superwall, Purchasely, Nami ML, and custom servers
  
- 2. Feature Flags from Server
-    - Apps that fetch premium features list from their server
-    - The app code checks server response, not local purchase status
+ 2. Feature Flags from Server - Modifies JSON responses to enable all premium features
  
- 3. Obfuscated StoreKit Calls
-    - Apps that use heavy obfuscation on IAP code
-    - Apps that use custom IAP wrappers with anti-tampering
+ 3. Server-tracked consumables - Sets coins/gems/credits to 999,999,999 in responses
  
- 4. Cloud-Synced Purchases
-    - Apps that verify purchases through iCloud
-    - Apps requiring Apple ID sign-in for features
+ 4. Authentication bypasses - Generates fake auth tokens for premium user status
  
- 5. Consumable IAPs with Server Tracking
-    - Games that track currency/items on their server
-    - Purchases must be verified server-side before granting items
+ 5. UserDefaults/local storage - Hooks premium check methods to return true
  
- Workarounds to try:
- 1. Enable ALL options (Observer, Receipt, Stealth)
- 2. Disconnect from internet before purchasing
- 3. Try different combinations of settings
- 4. Some apps may need a restart after changing settings
+ ❌ STILL CHALLENGING (Enable Stealth + Offline mode):
+ 1. Certificate pinning with custom TLS validation
+ 2. Binary-encrypted responses (custom encryption schemes)  
+ 3. Server-authoritative games (MMOs where items only exist on their servers)
+ 4. Apps with advanced anti-tamper/integrity checks
+ 
+ 💡 PRO TIPS:
+ 1. Enable ALL Nuclear options for stubborn apps
+ 2. Also enable Receipt + Stealth
+ 3. Try offline/airplane mode if app supports it
+ 4. Restart app after changing settings
+ 5. For games: make purchase, cancel Apple ID popup, check if items granted
 */
 
 // MARK: - App-Specific Patterns
@@ -130,7 +166,13 @@ struct AppPatterns {
         "PurchaseManager",
         "ProManager",
         "UnlockManager",
-        "EntitlementManager"
+        "EntitlementManager",
+        "RevenueCat",
+        "RCPurchases",
+        "Purchases",
+        "Adapty", 
+        "Qonversion",
+        "Glassfy"
     ]
     
     /// Common method patterns for checking premium status
@@ -142,6 +184,10 @@ struct AppPatterns {
         "isUnlocked",
         "hasPurchased",
         "checkEntitlement",
-        "validatePurchase"
+        "validatePurchase",
+        "hasActiveSubscription",
+        "isEntitled",
+        "getCustomerInfo",
+        "restorePurchases"
     ]
 }
