@@ -10,22 +10,31 @@ struct WindowHook: Hook {
     let replace: T = { obj, sel in
         orig(obj, sel)
         
-        guard !SatellaController.shared.windows.contains(obj) else {
-            return
-        }
-        
-        let gesture = BindableGesture {
-            guard !Preferences.isHidden else {
+        // Thread-safe check for window registration
+        DispatchQueue.main.async {
+            guard !SatellaController.shared.windows.contains(where: { $0 === obj }) else {
                 return
             }
             
-            let rootVC: UIViewController? = obj.windowScene?.windows.first(where: { $0.isKeyWindow })?.rootViewController
-            rootVC?.add(SatellaController.shared)
+            let gesture = BindableGesture {
+                guard !Preferences.isHidden else {
+                    return
+                }
+                
+                // Use modern window scene API compatible with iOS 15-19
+                guard let windowScene = obj.windowScene,
+                      let keyWindow = windowScene.windows.first(where: { $0.isKeyWindow }),
+                      let rootVC = keyWindow.rootViewController else {
+                    return
+                }
+                rootVC.add(SatellaController.shared)
+            }
+            
+            gesture.numberOfTouchesRequired = 3
+            obj.addGestureRecognizer(gesture)
+            
+            // Use weak reference to avoid retain cycles
+            SatellaController.shared.windows.append(obj)
         }
-        
-        gesture.numberOfTouchesRequired = 3
-        obj.addGestureRecognizer(gesture)
-        
-        SatellaController.shared.windows.append(obj)
     }
 }

@@ -1,7 +1,25 @@
 # Satella Jailed
-*Free in-app purchases for jailed devices on iOS 12-16*
+*Free in-app purchases for jailed devices on iOS 12-19*
+
+**Version 2.0.0** - Now with iOS 19 and iPhone 17 Pro Max support!
 
 Satella Jailed is provided for educational purposes only and I am not responsible for any illegal actions taken with the use of this tool. No copyright material is distributed on this repo. Lawyer with a DMCA can stick it up their ass.
+
+## Compatibility
+- **iOS**: 12.2 - 19.x
+- **Devices**: All iPhones including iPhone 17 Pro Max (with Dynamic Island support)
+- **Architecture**: arm64
+
+## What's New in v2.0.0
+- ✅ iOS 19 full compatibility
+- ✅ iPhone 17 Pro Max Dynamic Island support
+- ✅ Fixed crash issues with thread-safe transaction handling
+- ✅ Modern window scene API (no deprecated UIApplication.windows)
+- ✅ Improved memory management with autoreleasepool
+- ✅ Better receipt verification URL handling
+- ✅ Enhanced UI with safe area support
+- ✅ Larger touch targets for modern displays
+- ✅ Graceful error handling throughout
 
 # Installation
 There are currently three official methods of installing Satella Jailed, but it should work with other patching tools.
@@ -31,4 +49,27 @@ Just attempt to make a purchase, then cancel the confirmation popup (the one wit
 
 By default, core functionality is enabled. If it doesn't work, and you are on iOS 15+, you can try enabling advanced features by tapping the purple star.
 
-Please note that Satella Jailed doesn’t work on every app. If various combinations of settings fail to crack the purchase, you’re out of luck.
+## Settings Explained
+- **Enabled**: Core IAP bypass functionality
+- **3-Finger Gesture**: Use 3-finger tap to show/hide the Satella button
+- **Hide Permanently**: Remove the floating button completely
+- **Observer**: Hook the payment transaction observer (try if default doesn't work)
+- **Zero Price**: Display prices as 0.00
+- **Receipt**: Generate fake purchase receipts (try for subscription apps)
+- **Stealth**: Hide Satella from dylib detection
+
+Please note that Satella Jailed doesn't work on every app. If various combinations of settings fail to crack the purchase, you're out of luck.
+
+# Building from Source
+Requirements:
+- macOS with Xcode 16+ or Theos
+- iOS 19.0 SDK
+
+```bash
+# Clone the repo
+git clone https://github.com/Paisseon/SatellaJailed.git
+cd SatellaJailed
+
+# Build with Theos
+make package
+```

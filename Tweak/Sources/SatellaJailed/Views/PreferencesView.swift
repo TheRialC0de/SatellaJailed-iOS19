@@ -12,74 +12,128 @@ struct PreferencesView: View {
     
     @Binding var isShowing: Bool
     @State private var isShowingOptions: Bool = false
+    @Environment(\.dismiss) private var dismiss
+    
+    private let satellaColor = Color(red: 0.80, green: 0.63, blue: 0.87)
     
     var body: some View {
-        ScrollView(showsIndicators: false) {
-            VStack(alignment: .center) {
-                Button {
-                    isShowing.toggle()
-                } label: {
-                    Image(systemName: "xmark.square.fill")
-                        .frame(maxWidth: .infinity, alignment: .trailing)
-                        .padding()
-                }
-                
-                Color(red: 0.80, green: 0.63, blue: 0.87)
-                    .mask { SatellaShapeView() }
-                    .frame(width: 50, height: 50)
-                    .padding()
-                    .padding(.bottom)
-                    .alert("Select an action", isPresented: $isShowingOptions) {
-                        Button("Apply Changes (Close App)") {
-                            abort()
-                        }
+        NavigationView {
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .center, spacing: 16) {
+                    // Logo
+                    satellaColor
+                        .mask { SatellaShapeView() }
+                        .frame(width: 60, height: 60)
+                        .padding(.top, 20)
+                    
+                    Text("Satella Jailed")
+                        .font(.title2)
+                        .fontWeight(.semibold)
+                    
+                    Text("iOS 12-19 • v2.0.0")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.bottom, 10)
+                    
+                    // Settings toggles
+                    VStack(spacing: 12) {
+                        SettingsToggle(title: "Enabled", subtitle: "Core IAP bypass", isOn: $isEnabled)
+                        SettingsToggle(title: "3-Finger Gesture", subtitle: "Show/hide Satella button", isOn: $isGesture)
+                        SettingsToggle(title: "Hide Permanently", subtitle: "Remove floating button", isOn: $isHidden)
                         
-                        Button("Hide Satella") {
-                            isShowing.toggle()
-                            SatellaController.shared.host.removeFromSuperview()
-                        }
+                        Divider().padding(.vertical, 4)
                         
-                        Button("View Source Code / FAQ") {
-                            UIApplication.shared.open(
-                                URL(string: "https://github.com/Paisseon/SatellaJailed")!,
-                                options: [:],
-                                completionHandler: nil
-                            )
-                        }
+                        Text("Advanced Options")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal)
                         
-                        Button("Cancel") {
-                            isShowingOptions.toggle()
-                        }
+                        SettingsToggle(title: "Observer", subtitle: "Hook payment observer", isOn: $isObserver)
+                        SettingsToggle(title: "Zero Price", subtitle: "Show 0.00 for prices", isOn: $isPriceZero)
+                        SettingsToggle(title: "Receipt", subtitle: "Generate fake receipts", isOn: $isReceipt)
+                        SettingsToggle(title: "Stealth", subtitle: "Hide from detection", isOn: $isStealth)
                     }
-                
-                VStack {
-                    Toggle("Enabled", isOn: $isEnabled)
-                    Toggle("3-Finger Gesture", isOn: $isGesture)
-                    Toggle("Hide Permanently", isOn: $isHidden)
-                    Toggle("Observer", isOn: $isObserver)
-                    Toggle("0,00 Price", isOn: $isPriceZero)
-                    Toggle("Receipt", isOn: $isReceipt)
-                    Toggle("Stealth", isOn: $isStealth)
-                }
-                .padding()
-                .padding(.horizontal, 10)
-                
-                Button("Apply") {
-                    isShowingOptions.toggle()
-                }
-                    .foregroundColor(.white)
                     .padding()
-                    .padding([.leading, .trailing])
                     .background(
-                        RoundedRectangle(
-                            cornerRadius: 13,
-                            style: .continuous
-                        )
-                        .fill(Color(red: 0.80, green: 0.63, blue: 0.87))
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color(.systemBackground))
+                            .shadow(color: .black.opacity(0.05), radius: 10)
                     )
-                    .padding(.top)
+                    .padding(.horizontal)
+                    
+                    // Apply button
+                    Button(action: { isShowingOptions.toggle() }) {
+                        Text("Apply")
+                            .fontWeight(.semibold)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .background(
+                                RoundedRectangle(cornerRadius: 13, style: .continuous)
+                                    .fill(satellaColor)
+                            )
+                    }
+                    .padding(.horizontal)
+                    .padding(.top, 10)
+                    
+                    Spacer(minLength: 40)
+                }
             }
-            .tint(Color(red: 0.80, green: 0.63, blue: 0.87))
+            .background(Color(.systemGroupedBackground).ignoresSafeArea())
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        isShowing = false
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+            .confirmationDialog("Select an action", isPresented: $isShowingOptions, titleVisibility: .visible) {
+                Button("Apply Changes (Restart App)", role: .destructive) {
+                    // Graceful exit instead of abort() for iOS 19
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        exit(0)
+                    }
+                }
+                
+                Button("Hide Satella") {
+                    isShowing = false
+                    SatellaController.shared.host.removeFromSuperview()
+                }
+                
+                Button("View Source / FAQ") {
+                    if let url = URL(string: "https://github.com/Paisseon/SatellaJailed") {
+                        UIApplication.shared.open(url)
+                    }
+                }
+                
+                Button("Cancel", role: .cancel) { }
+            }
         }
+        .tint(satellaColor)
+    }
+}
+
+@available(iOS 15, *)
+private struct SettingsToggle: View {
+    let title: String
+    let subtitle: String
+    @Binding var isOn: Bool
+    
+    var body: some View {
+        Toggle(isOn: $isOn) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.body)
+                Text(subtitle)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 4)
     }
 }

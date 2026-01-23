@@ -1,4 +1,4 @@
-// swift-tools-version:5.8
+// swift-tools-version:5.10
 
 import Darwin.POSIX
 import PackageDescription
@@ -12,7 +12,7 @@ let swiftFlags: [String] = [
     "-I\(theosPath)/vendor/include",
     "-I\(theosPath)/include",
     "-target", "arm64-apple-ios\(minFirmware)",
-    "-sdk", "\(theosPath)/sdks/iPhoneOS16.0.sdk",
+    "-sdk", "\(theosPath)/sdks/iPhoneOS19.0.sdk",
     "-resource-dir", "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift"
 ]
 
