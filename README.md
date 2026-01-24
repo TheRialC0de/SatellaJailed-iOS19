@@ -5,6 +5,22 @@
 
 > ⚠️ **iPhone 17 Pro Max users: NO JAILBREAK REQUIRED!** This tweak works on stock iOS 19 - just sideload and go.
 
+[![Build IPA](https://github.com/Paisseon/SatellaJailed/actions/workflows/build-ipa.yml/badge.svg)](https://github.com/Paisseon/SatellaJailed/actions/workflows/build-ipa.yml)
+
+## 📲 Quick Install
+
+**[Download the latest IPA from Releases](../../releases/latest)** and install using one of these methods:
+
+| Method | Computer Required | Refresh Needed | Best For |
+|--------|------------------|----------------|----------|
+| **TrollStore** | No | Never | iOS 14.0-16.6.1 |
+| **AltStore** | Yes (first time) | Every 7 days | All iOS versions |
+| **Sideloadly** | Yes | Every 7 days | All iOS versions |
+
+👉 **[Full Installation Guide](INSTALL.md)**
+
+---
+
 Satella Jailed is provided for educational purposes only and I am not responsible for any illegal actions taken with the use of this tool. No copyright material is distributed on this repo. Lawyer with a DMCA can stick it up their ass.
 
 ## Compatibility

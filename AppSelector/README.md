@@ -1,20 +1,33 @@
 AppSelector
 =================
 
-Small SwiftUI app source you can add to an Xcode iOS project. It lists installed apps (uses private API) and lets you select one app. The selected app's bundle identifier is written to `/var/mobile/Library/Preferences/com.satella.selected.plist`.
+SwiftUI app that lets you select an installed app. **Works out of the box** - no developer options, no jailbreak, no manual configuration needed.
 
-Requirements & notes
-- Build on macOS with Xcode targeting an iPhone device.
-- This app uses private APIs (LSApplicationWorkspace) to enumerate installed apps; it will not be App-Store compliant.
-- On a non-jailbroken device the app may not be able to write to `/var/mobile/Library/Preferences/` due to sandboxing/permissions. On a jailbroken device the file is useful for your tweak to read.
+## Features
 
-How to use
-1. Create a new iOS App project in Xcode (SwiftUI, iOS target).
-2. Add the Swift files from `Sources/` into the project.
-3. Build and run on a device (preferably jailbroken for full functionality).
-4. Open the app, select an installed app, then tap "Save Selection".
+- **Zero configuration** - all settings are pre-configured
+- **Auto-detects popular apps** using URL schemes
+- **Manual bundle ID entry** for any app
+- **Onboarding flow** guides users through setup
+- **Remembers selection** between launches
 
-Tweak integration
-- Configure your tweak to read `/var/mobile/Library/Preferences/com.satella.selected.plist` and apply behavior to the chosen bundle identifier.
+## Just Build & Run
 
-If you want, I can also scaffold an `.xcodeproj` / entitlements and adjust the app to use an App Group or alternative storage method.
+1. Create a new iOS App project in Xcode (SwiftUI, iOS target)
+2. Add all files from `Sources/` into the project (including Info.plist)
+3. Build and run - that's it!
+
+The included `Info.plist` has all required URL schemes pre-configured. No manual setup needed.
+
+## How It Works
+
+- First launch shows a welcome screen
+- App automatically scans for installed apps
+- If apps aren't detected, shows popular bundle IDs to tap
+- User can always manually enter any bundle ID
+- Selection is saved locally and persists
+
+## Storage Location
+
+- **Regular devices**: App's Documents folder
+- **Jailbroken devices**: `/var/mobile/Library/Preferences/com.satella.selected.plist`
