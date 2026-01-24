@@ -307,11 +307,15 @@ jobs:
           CODE_SIGN_IDENTITY="" \
           CODE_SIGNING_REQUIRED=NO \
           CODE_SIGNING_ALLOWED=NO \
+          SYMROOT="$(pwd)/build" \
           build
 
     - name: Create IPA
       run: |
         cd AppSelector
+        echo "Build output contents:"
+        find build -name "*.app" 2>/dev/null || echo "No .app found"
+        ls -la build/Release-iphoneos/ 2>/dev/null || echo "Release-iphoneos not found"
         mkdir -p Payload
         cp -r build/Release-iphoneos/AppSelector.app Payload/
         zip -r AppSelector.ipa Payload
