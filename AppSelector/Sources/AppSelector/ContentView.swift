@@ -316,8 +316,12 @@ struct MainAppView: View {
                                 Image(systemName: "arrow.clockwise")
                                 Text("Refresh")
                             }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            .background(Color(.systemGray5))
+                            .cornerRadius(8)
                         }
-                        .buttonStyle(.bordered)
+                        .foregroundColor(.primary)
                         
                         Spacer()
                         
@@ -326,8 +330,12 @@ struct MainAppView: View {
                                 Image(systemName: "checkmark.circle")
                                 Text("Save")
                             }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(8)
                         }
-                        .buttonStyle(.borderedProminent)
                     }
 
                     if let msg = vm.errorMessage {
