@@ -101,3 +101,85 @@ cd SatellaJailed
 # Build with Theos
 make package
 ```
+
+---
+
+# AppSelector - Companion App
+
+A SwiftUI iOS app that lists all installed apps on your iPhone and lets you select which app to apply Satella on. The selection is saved so the tweak knows which app to target.
+
+## AppSelector Installation
+
+### Requirements
+- macOS with Xcode 15+ (to build the app)
+- iPhone (jailbroken recommended for full functionality)
+- iOS 14.0 or later
+
+### Method 1: Build from Source (Recommended)
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/Paisseon/SatellaJailed.git
+   cd SatellaJailed/AppSelector
+   ```
+
+2. **Open in Xcode**
+   - Open Xcode and create a new iOS App project (SwiftUI)
+   - Copy all files from `Sources/AppSelector/` into your project
+   - Set your Team for code signing
+
+3. **Build and Install**
+   - Connect your iPhone
+   - Select your device as the build target
+   - Press `Cmd + R` to build and run
+
+4. **Trust the Developer**
+   - On your iPhone: Settings → General → VPN & Device Management
+   - Tap your developer certificate and trust it
+
+### Method 2: Sideload with AltStore/Sideloadly
+
+1. Download the pre-built IPA from [Releases](../../releases)
+2. Use AltStore, Sideloadly, or similar to install the IPA
+3. Trust the app in Settings → General → VPN & Device Management
+
+### Method 3: TrollStore (No Revokes)
+
+1. Download the IPA from [Releases](../../releases)
+2. Open in TrollStore
+3. Tap Install - done!
+
+## How to Use AppSelector
+
+1. **Open AppSelector** on your iPhone
+2. **Browse the list** of all installed apps
+3. **Tap an app** to select it (checkmark appears)
+4. **Tap "Save Selection"** to save your choice
+5. The selected app's bundle ID is saved to `/var/mobile/Library/Preferences/com.satella.selected.plist`
+6. Now patch that app with Satella and the tweak will apply!
+
+## Troubleshooting
+
+| Problem | Solution |
+|---------|----------|
+| "No apps found" | The private API may be blocked on stock iOS. Use on jailbroken device or check entitlements |
+| "Save failed" | On non-jailbroken devices, the app can't write to system paths. The selection still works in-memory |
+| App crashes | Ensure you're running iOS 14.0+ and the app is properly signed |
+
+## For Developers
+
+The AppSelector uses `LSApplicationWorkspace` (private API) to enumerate installed apps. This won't pass App Store review but works perfectly for sideloaded/jailbroken usage.
+
+Key files:
+- `AppSelectorApp.swift` - App entry point
+- `ContentView.swift` - Main UI and ViewModel
+- `InstalledApp.swift` - Data model
+- `InstalledAppsProvider.swift` - Private API calls and plist saving
+
+---
+
+# Support
+If you have issues, check [ERRORS_AND_TROUBLESHOOTING.md](ERRORS_AND_TROUBLESHOOTING.md) first.
+
+# License
+See [LICENSE](LICENSE) for details.
