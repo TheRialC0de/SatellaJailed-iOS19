@@ -17,29 +17,26 @@ jobs:
       - name: Setup Theos
         uses: waruhachi/theos-action@v2.6.5
         with:
-      - name: Setup Theos
-        uses: waruhachi/theos-action@v2.6.5
-        with:
           theos-src: 'theos/theos'
           theos-branch: 'master'
           sdks-src: 'theos/sdks'
           sdks-branch: 'master'
 
-      - name: Install Jinx Framework
+      - name: Prepare Environment & Apply Patches
         run: |
-          echo "Cloning and installing Jinx framework..."
-          git clone --branch master https://github.com/Paisseon/Jinx.git /tmp/Jinx
-          mkdir -p $THEOS/include/Jinx
-          cp -R /tmp/Jinx/Sources/Jinx/* $THEOS/include/Jinx/
-
-      - name: Fix Makefile and SDK
-        run: |
-          # 1. Заменяем iPhoneOS19.0.sdk на iPhoneOS16.5.sdk, который реально есть на сервере
+          # 1. Заменяем iPhoneOS19.0.sdk на iPhoneOS16.5.sdk в Makefile
           sed -i '' 's/iPhoneOS19\.0\.sdk/iPhoneOS16.5.sdk/g' Makefile
 
-          # 2. Удаляем текстовые swiftinterface интерфейсы SwiftUI, чтобы новый компилятор не выдавал ошибки парсинга
+          # 2. Удаляем проблемные текстовые swiftinterface интерфейсы SwiftUI
           echo "Cleaning up SwiftUI swiftinterface files..."
           find "$THEOS/sdks/iPhoneOS16.5.sdk/System/Library/Frameworks/SwiftUI.framework" -name "*.swiftinterface" -exec rm -f {} \;
+
+          # 3. Запускаем штатный скрипт патча автора репозитория (он сам скачает Jinx и настроит зависимости)
+          if [ -f "patch-mac.sh" ]; then
+            echo "Running patch-mac.sh..."
+            chmod +x patch-mac.sh
+            ./patch-mac.sh
+          fi
 
       - name: Build Tweak
         run: |
