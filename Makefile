@@ -11,7 +11,7 @@ export DEBUG = 0
 export THEOS_LEAN_AND_MEAN = 1
 export USING_JINX = 1
 
-# Forțează compilatorul Swift să caute modulul Jinx în include-urile Theos
+# 1
 export SWIFTFLAGS = -I$(THEOS)/include
 
 # Define subprojects
