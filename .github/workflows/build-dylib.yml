@@ -22,15 +22,10 @@ jobs:
           sdks-src: 'theos/sdks'
           sdks-branch: 'master'
 
-      - name: Fix SDK for iOS 19
+      - name: Fix Makefile SYSROOT
         run: |
-          echo "Available SDKs:"
-          ls -la $THEOS/sdks
-          LATEST_SDK=$(ls $THEOS/sdks | grep "iPhoneOS" | tail -n 1)
-          echo "Using $LATEST_SDK as base for iPhoneOS19.0.sdk"
-          if [ ! -d "$THEOS/sdks/iPhoneOS19.0.sdk" ]; then
-            cp -r "$THEOS/sdks/$LATEST_SDK" "$THEOS/sdks/iPhoneOS19.0.sdk"
-          fi
+          echo "Forcing Makefile to use iPhoneOS16.5.sdk"
+          sed -i '' 's/iPhoneOS19\.0\.sdk/iPhoneOS16.5.sdk/g' Makefile
 
       - name: Build Tweak
         run: |
@@ -42,4 +37,5 @@ jobs:
           name: compiled-tweak
           path: |
             packages/*.deb
-            obj/*.dylib
+            **/obj/*.dylib
+            .theos/obj/*.dylib
