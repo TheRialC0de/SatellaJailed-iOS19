@@ -22,7 +22,7 @@ jobs:
           sdks-src: 'theos/sdks'
           sdks-branch: 'master'
 
-      - name: Prepare Environment & Apply Patches
+      - name: Fix SDK and Prepare Jinx Dependency
         run: |
           # 1. Заменяем iPhoneOS19.0.sdk на iPhoneOS16.5.sdk в Makefile
           sed -i '' 's/iPhoneOS19\.0\.sdk/iPhoneOS16.5.sdk/g' Makefile
@@ -31,7 +31,23 @@ jobs:
           echo "Cleaning up SwiftUI swiftinterface files..."
           find "$THEOS/sdks/iPhoneOS16.5.sdk/System/Library/Frameworks/SwiftUI.framework" -name "*.swiftinterface" -exec rm -f {} \;
 
-          # 3. Запускаем штатный скрипт патча автора репозитория (он сам скачает Jinx и настроит зависимости)
+          # 3. Клонируем Jinx во все целевые директории, которые ожидает patch-mac.sh и Theos
+          echo "Cloning and placing Jinx framework..."
+          git clone https://github.com/Paisseon/Jinx.git /tmp/Jinx
+          
+          # Для Theos include
+          mkdir -p $THEOS/include/Jinx
+          cp -R /tmp/Jinx/Sources/Jinx/* $THEOS/include/Jinx/ 2>/dev/null || true
+          
+          # Для локального пути проекта, который ищет patch-mac.sh
+          mkdir -p SourcePackages/checkouts/Jinx
+          cp -R /tmp/Jinx/* SourcePackages/checkouts/Jinx/
+          
+          # На всякий случай создаем абсолютный системный путь
+          sudo mkdir -p /SourcePackages/checkouts/Jinx
+          sudo cp -R /tmp/Jinx/* /SourcePackages/checkouts/Jinx/ 2>/dev/null || true
+
+          # 4. Запускаем штатный скрипт патча
           if [ -f "patch-mac.sh" ]; then
             echo "Running patch-mac.sh..."
             chmod +x patch-mac.sh
