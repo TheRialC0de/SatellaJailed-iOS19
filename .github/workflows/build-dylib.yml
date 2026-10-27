@@ -22,13 +22,17 @@ jobs:
           sdks-src: 'theos/sdks'
           sdks-branch: 'master'
 
-      - name: Clone Jinx as Subproject
+      - name: Install Jinx Framework properly
         run: |
-          echo "Cloning Jinx into project root..."
-          git clone https://github.com/Paisseon/Jinx.git Jinx
+          echo "Cloning Jinx framework..."
+          git clone https://github.com/Paisseon/Jinx.git /tmp/Jinx
           
-          # Добавляем Jinx в SUBPROJECTS в корневом Makefile
-          sed -i '' 's/SUBPROJECTS += Tweak/SUBPROJECTS += Jinx Tweak/g' Makefile
+          # Создаем директорию инклудов для Jinx в Theos и копируем туда исходники
+          mkdir -p $THEOS/include/Jinx
+          cp -R /tmp/Jinx/Sources/Jinx/* $THEOS/include/Jinx/
+          
+          # Возвращаем SUBPROJECTS в Makefile только для Tweak (если ранее изменяли)
+          sed -i '' 's/SUBPROJECTS += Jinx Tweak/SUBPROJECTS += Tweak/g' Makefile
 
       - name: Fix SDK and Makefile
         run: |
