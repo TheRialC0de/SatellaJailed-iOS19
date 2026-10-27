@@ -26,14 +26,15 @@ jobs:
         run: |
           echo "Cloning Jinx framework..."
           git clone https://github.com/Paisseon/Jinx.git /tmp/Jinx
-          python3 /tmp/Jinx/install_jinx.py
+          mkdir -p $THEOS/include/Jinx
+          cp -r /tmp/Jinx/Sources/Jinx/* $THEOS/include/Jinx/
 
       - name: Fix SDK and Makefile
         run: |
           # 1. Принудительно ставим iPhoneOS16.5.sdk в Makefile
           sed -i '' 's/iPhoneOS19\.0\.sdk/iPhoneOS16.5.sdk/g' Makefile
 
-          # 2. Исправляем ошибку string interpolation в os_log внутри SwiftUI SDK
+          # 2. Исправляем ошибку в SwiftUI SDK для совместимости с компилятором
           SWIFTUI_INTERFACE="$THEOS/sdks/iPhoneOS16.5.sdk/System/Library/Frameworks/SwiftUI.framework/Modules/SwiftUI.swiftmodule/arm64-apple-ios.swiftinterface"
           if [ -f "$SWIFTUI_INTERFACE" ]; then
             echo "Patching SwiftUI swiftinterface..."
