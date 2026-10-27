@@ -1,7 +1,7 @@
 # Basic environment configuration
 
 export SYSROOT = $(THEOS)/sdks/iPhoneOS19.0.sdk/
-export TARGET = iphone:clang:latest:12.2
+TARGET = iphone:latest:15.0
 export ROOTLESS = 0
 
 # Theos optimisations
