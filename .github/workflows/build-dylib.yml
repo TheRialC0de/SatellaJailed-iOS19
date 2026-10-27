@@ -22,23 +22,22 @@ jobs:
           sdks-src: 'theos/sdks'
           sdks-branch: 'master'
 
-      - name: Install Jinx Framework
+      - name: Clone Jinx as Subproject
         run: |
-          echo "Cloning Jinx framework into Theos include directory..."
-          rm -rf $THEOS/include/Jinx
-          git clone https://github.com/Paisseon/Jinx.git $THEOS/include/Jinx
+          echo "Cloning Jinx into project root..."
+          git clone https://github.com/Paisseon/Jinx.git Jinx
+          
+          # Добавляем Jinx в SUBPROJECTS в корневом Makefile
+          sed -i '' 's/SUBPROJECTS += Tweak/SUBPROJECTS += Jinx Tweak/g' Makefile
 
       - name: Fix SDK and Makefile
         run: |
-          # 1. Заменяем iPhoneOS19.0.sdk на реально доступный iPhoneOS16.5.sdk в Makefile
+          # 1. Заменяем iPhoneOS19.0.sdk на iPhoneOS16.5.sdk в Makefile
           sed -i '' 's/iPhoneOS19\.0\.sdk/iPhoneOS16.5.sdk/g' Makefile
 
-          # 2. Переименовываем swiftinterface для SwiftUI, чтобы избежать ошибок парсинга новым компилятором
-          SWIFTUI_INTERFACE="$THEOS/sdks/iPhoneOS16.5.sdk/System/Library/Frameworks/SwiftUI.framework/Modules/SwiftUI.swiftmodule/arm64-apple-ios.swiftinterface"
-          if [ -f "$SWIFTUI_INTERFACE" ]; then
-            echo "Bypassing SwiftUI swiftinterface..."
-            mv "$SWIFTUI_INTERFACE" "${SWIFTUI_INTERFACE}.bak"
-          fi
+          # 2. Удаляем проблемные текстовые интерфейсы SwiftUI, чтобы компилятор не падал на них
+          echo "Cleaning up SwiftUI swiftinterface files..."
+          find "$THEOS/sdks/iPhoneOS16.5.sdk/System/Library/Frameworks/SwiftUI.framework" -name "*.swiftinterface" -exec rm -f {} \;
 
       - name: Build Tweak
         run: |
