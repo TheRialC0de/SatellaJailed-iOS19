@@ -24,21 +24,20 @@ jobs:
 
       - name: Install Jinx Framework
         run: |
-          echo "Cloning Jinx framework..."
-          git clone https://github.com/Paisseon/Jinx.git /tmp/Jinx
-          mkdir -p $THEOS/include/Jinx
-          cp -r /tmp/Jinx/Sources/Jinx/* $THEOS/include/Jinx/
+          echo "Cloning Jinx framework into Theos include directory..."
+          rm -rf $THEOS/include/Jinx
+          git clone https://github.com/Paisseon/Jinx.git $THEOS/include/Jinx
 
       - name: Fix SDK and Makefile
         run: |
-          # 1. Принудительно ставим iPhoneOS16.5.sdk в Makefile
+          # 1. Заменяем iPhoneOS19.0.sdk на реально доступный iPhoneOS16.5.sdk в Makefile
           sed -i '' 's/iPhoneOS19\.0\.sdk/iPhoneOS16.5.sdk/g' Makefile
 
-          # 2. Исправляем ошибку в SwiftUI SDK для совместимости с компилятором
+          # 2. Переименовываем swiftinterface для SwiftUI, чтобы избежать ошибок парсинга новым компилятором
           SWIFTUI_INTERFACE="$THEOS/sdks/iPhoneOS16.5.sdk/System/Library/Frameworks/SwiftUI.framework/Modules/SwiftUI.swiftmodule/arm64-apple-ios.swiftinterface"
           if [ -f "$SWIFTUI_INTERFACE" ]; then
-            echo "Patching SwiftUI swiftinterface..."
-            sed -i '' 's/os_log(\.fault, log: Log.runtimeIssuesLog, """/os_log(.fault, log: Log.runtimeIssuesLog, "Accessing Environment value outside of view."/g' "$SWIFTUI_INTERFACE"
+            echo "Bypassing SwiftUI swiftinterface..."
+            mv "$SWIFTUI_INTERFACE" "${SWIFTUI_INTERFACE}.bak"
           fi
 
       - name: Build Tweak
