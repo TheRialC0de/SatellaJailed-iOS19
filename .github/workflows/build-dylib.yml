@@ -1,0 +1,36 @@
+name: Build Theos Tweak
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Theos
+        uses: waruhachi/theos-action@v2.6.5
+        with:
+          theos-src: 'theos/theos'
+          theos-branch: 'master'
+          sdks-src: 'theos/sdks'
+          sdks-branch: 'master'
+
+      - name: Build Tweak
+        run: |
+          make package
+        working-directory: Tweak/Sources/SatellaJailed
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: compiled-tweak
+          path: |
+            Tweak/Sources/SatellaJailed/packages/*.deb
+            Tweak/Sources/SatellaJailed/obj/*.dylib
