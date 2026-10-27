@@ -24,30 +24,29 @@ jobs:
 
       - name: Fix SDK and Prepare Jinx Dependency
         run: |
-          # 1. Заменяем iPhoneOS19.0.sdk на iPhoneOS16.5.sdk в Makefile
+          # 1. Înlocuim iPhoneOS19.0.sdk cu iPhoneOS16.5.sdk în Makefile-ul de configurare
           sed -i '' 's/iPhoneOS19\.0\.sdk/iPhoneOS16.5.sdk/g' Makefile
 
-          # 2. Удаляем проблемные текстовые swiftinterface интерфейсы SwiftUI
+          # 2. Ștergem fișierele .swiftinterface problematice din SwiftUI pentru a evita crash-urile compilatorului
           echo "Cleaning up SwiftUI swiftinterface files..."
           find "$THEOS/sdks/iPhoneOS16.5.sdk/System/Library/Frameworks/SwiftUI.framework" -name "*.swiftinterface" -exec rm -f {} \;
 
-          # 3. Клонируем Jinx во все целевые директории, которые ожидает patch-mac.sh и Theos
-          echo "Cloning and placing Jinx framework..."
-          git clone https://github.com/Paisseon/Jinx.git /tmp/Jinx
+          # 3. Descărcăm framework-ul Jinx din sursa oficială
+          echo "Cloning Jinx framework..."
+          git clone https://github.com /tmp/Jinx
           
-          # Для Theos include
-          mkdir -p $THEOS/include/Jinx
-          cp -R /tmp/Jinx/Sources/Jinx/* $THEOS/include/Jinx/ 2>/dev/null || true
+          # 4. Creăm structura exactă pe care import Jinx o caută global în Theos
+          mkdir -p "$THEOS/include/Jinx"
+          cp -R /tmp/Jinx/Sources/Jinx/* "$THEOS/include/Jinx/"
           
-          # Для локального пути проекта, который ищет patch-mac.sh
+          # 5. Menținem structurile locale în caz că scriptul patch-mac.sh depinde direct de ele
           mkdir -p SourcePackages/checkouts/Jinx
           cp -R /tmp/Jinx/* SourcePackages/checkouts/Jinx/
           
-          # На всякий случай создаем абсолютный системный путь
           sudo mkdir -p /SourcePackages/checkouts/Jinx
           sudo cp -R /tmp/Jinx/* /SourcePackages/checkouts/Jinx/ 2>/dev/null || true
 
-          # 4. Запускаем штатный скрипт патча
+          # 6. Rulăm scriptul de patch local dacă este prezent în proiect
           if [ -f "patch-mac.sh" ]; then
             echo "Running patch-mac.sh..."
             chmod +x patch-mac.sh
