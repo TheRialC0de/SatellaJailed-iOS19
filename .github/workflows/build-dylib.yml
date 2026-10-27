@@ -22,10 +22,23 @@ jobs:
           sdks-src: 'theos/sdks'
           sdks-branch: 'master'
 
-      - name: Fix Makefile SYSROOT
+      - name: Install Jinx Framework
         run: |
-          echo "Forcing Makefile to use iPhoneOS16.5.sdk"
+          echo "Cloning Jinx framework..."
+          git clone https://github.com/Paisseon/Jinx.git /tmp/Jinx
+          python3 /tmp/Jinx/install_jinx.py
+
+      - name: Fix SDK and Makefile
+        run: |
+          # 1. Принудительно ставим iPhoneOS16.5.sdk в Makefile
           sed -i '' 's/iPhoneOS19\.0\.sdk/iPhoneOS16.5.sdk/g' Makefile
+
+          # 2. Исправляем ошибку string interpolation в os_log внутри SwiftUI SDK
+          SWIFTUI_INTERFACE="$THEOS/sdks/iPhoneOS16.5.sdk/System/Library/Frameworks/SwiftUI.framework/Modules/SwiftUI.swiftmodule/arm64-apple-ios.swiftinterface"
+          if [ -f "$SWIFTUI_INTERFACE" ]; then
+            echo "Patching SwiftUI swiftinterface..."
+            sed -i '' 's/os_log(\.fault, log: Log.runtimeIssuesLog, """/os_log(.fault, log: Log.runtimeIssuesLog, "Accessing Environment value outside of view."/g' "$SWIFTUI_INTERFACE"
+          fi
 
       - name: Build Tweak
         run: |
